@@ -6,7 +6,7 @@ import (
     "strconv"
     re "regexp"
 
-    "github.com/Irides-Chromium/gysp/color"
+    "github.com/crides/gysp/color"
 )
 
 // []*Token --- Parse --> Tree of Node
@@ -27,7 +27,7 @@ type Node interface {
 }
 
 type SymNode struct {       // Normal symbols
-    name    string
+    Name    string
 }
 
 func NewSymNode(name string) *SymNode {
@@ -39,12 +39,12 @@ func (sn * SymNode) NodeTyp() NodeType {
 }
 
 func (sn * SymNode) String() string {
-    return color.Teal(sn.name)
+    return color.Teal(sn.Name)
 }
 
 type CallNode struct {      // Function and macro calls
-    fun     Node       // Function head
-    arglist []Node     // Function argument list
+    Fun     Node       // Function head
+    Arglist []Node     // Function argument list
 }
 
 func NewCallNode(fun Node) *CallNode {
@@ -57,14 +57,14 @@ func (cn * CallNode) NodeTyp() NodeType {
 
 func (cn * CallNode) String() string {
     liststr := ""
-    for i, arg := range cn.arglist {
+    for i, arg := range cn.Arglist {
         if i == 0 {
             liststr += arg.String()
         } else {
             liststr += " " + arg.String()
         }
     }
-    return color.Red(fmt.Sprintf("(%s %s)", cn.fun, liststr))
+    return color.Red(fmt.Sprintf("(%s %s)", cn.Fun, liststr))
 }
 
 func NewCallNodeFromList(node *ListNode) *CallNode {
@@ -77,15 +77,15 @@ func NewCallNodeFromList(node *ListNode) *CallNode {
 }
 
 func (cn * CallNode) AddArg(node Node) {
-    cn.arglist = append(cn.arglist, node)
+    cn.Arglist = append(cn.Arglist, node)
 }
 
 func (cn * CallNode) GetArgs() []Node {
-    return cn.arglist
+    return cn.Arglist
 }
 
 type ListNode struct {
-    list    []Node     // The contents
+    List    []Node     // The contents
 }
 
 func NewListNode() *ListNode {
@@ -97,19 +97,19 @@ func (ln * ListNode) NodeTyp() NodeType {
 }
 
 func (ln * ListNode) String() string {
-    return color.Green(fmt.Sprintf("%v", ln.list))
+    return color.Green(fmt.Sprintf("%v", ln.List))
 }
 
 func (ln * ListNode) Add(node Node) {
-    ln.list = append(ln.list, node)
+    ln.List = append(ln.List, node)
 }
 
 func (ln * ListNode) GetList() []Node {
-    return ln.list
+    return ln.List
 }
 
 type DictNode struct {
-    dict    map[Node]Node
+    Dict    map[Node]Node
 }
 
 func NewDictNode() *DictNode {
@@ -134,19 +134,19 @@ func (dn * DictNode) NodeTyp() NodeType {
 }
 
 func (dn * DictNode) String() string {
-    return color.Yellow(fmt.Sprint(dn.dict))
+    return color.Yellow(fmt.Sprint(dn.Dict))
 }
 
 func (dn * DictNode) Set(key, val Node) {
-    dn.dict[key] = val
+    dn.Dict[key] = val
 }
 
 func (dn * DictNode) GetDict() map[Node]Node {
-    return dn.dict
+    return dn.Dict
 }
 
 type LiteralNode struct {       // A node that represents a literal other than lists and dicts
-    val     interface{}
+    Val     interface{}
 }
 
 func NewLiteralNode(val interface{}) *LiteralNode {
@@ -158,7 +158,7 @@ func (ln * LiteralNode) NodeTyp() NodeType {
 }
 
 func (ln * LiteralNode) String() string {
-    switch u := ln.val.(type) {
+    switch u := ln.Val.(type) {
     case int:
         return color.Blue(strconv.Itoa(u))
     case float64:
@@ -172,7 +172,7 @@ func (ln * LiteralNode) String() string {
 }
 
 func (ln * LiteralNode) GetVal() interface{} {
-    return ln.val
+    return ln.Val
 }
 
 func Parse(tokens []*Token) Node {

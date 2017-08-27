@@ -3,11 +3,12 @@ package main
 import (
     "fmt"
 
-    "github.com/Irides-Chromium/gysp/parse"
+    "github.com/crides/gysp/parse"
+    "github.com/crides/gysp/eval"
 )
 
 func main() {
-    code := "(fn number? [n] (^ (int? `(n ~@a)) (is-float 'n) (complex? n))) (print 34 3.1415 4-1j 3. .5 \"\\\"Hello!\\033[0mtest\\\"\")"
+    code := `(debug (if nil {"yes" true} {"no" false}))`
     l := parse.NewLexer()
-    fmt.Println(parse.Parse(l.Lex(code)))
+    fmt.Println(eval.Eval(parse.Parse(l.Lex(code)), eval.StandardEnv()))
 }

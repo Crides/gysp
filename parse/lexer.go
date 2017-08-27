@@ -72,7 +72,7 @@ func NewLexer() *Lexer {
         // Raw strings are better!
         `\(`, `\)`, `\[`, `\]`, `\{`, `\}`, // Brackets
 
-        `"(?:[^"]|(?:\"))*"`,               // String
+        `"(?:[^"]|(?:\"))*?"`,              // String
         `[+-]?(?:\d*\.)?\d+[+-]?(?:\d*\.)?\d+j`,    // Complex
         `[+-]?\d*\.\d+`,                    // Float
         `[+-]?\d+`,                         // Integer
