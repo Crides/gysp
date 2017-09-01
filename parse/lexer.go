@@ -102,20 +102,12 @@ func NewLexer() *Lexer {
         `\v`, "\v",
     )
     l.repats = []*re.Regexp{
-        re.MustCompile(`\\[0-7]{0,3}`),
         re.MustCompile(`\\x[0-9a-fA-F]{0,2}`),
         re.MustCompile(`\\u[0-9a-fA-F]{0,4}`),
         re.MustCompile(`\\U[0-9a-fA-F]{0,8}`),
+        re.MustCompile(`\\[0-7]{0,3}`),
     }
     l.refuncs = []func(string)string {
-        func(s string) string {
-            if len(s) != 4 {
-                panic(`\ must be followed by exactly 3 octdigits!`)
-            }
-            i, _ := strconv.ParseInt(s[1:], 8, 8)
-            return string(i)
-        },
-
         func(s string) string {
             if len(s) != 4 {
                 panic(`\x must be followed by exactly 2 hexdigits!`)
@@ -137,6 +129,14 @@ func NewLexer() *Lexer {
                 panic(`\u must be followed by exactly 8 hexdigits!`)
             }
             i, _ := strconv.ParseInt(s[2:], 16, 32)
+            return string(i)
+        },
+
+        func(s string) string {
+            if len(s) != 4 {
+                panic(`\ must be followed by exactly 3 octdigits!`)
+            }
+            i, _ := strconv.ParseInt(s[1:], 8, 8)
             return string(i)
         },
     }

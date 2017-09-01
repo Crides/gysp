@@ -2,7 +2,6 @@ package parse
 
 import (
     "fmt"
-    //"strings"
     "strconv"
     re "regexp"
 
@@ -19,6 +18,7 @@ const (
     NODE_DICT
     NODE_SYM
     NODE_LIT
+    NODE_WRAP       // Just wrap a object up
 )
 
 type Node interface {
@@ -41,6 +41,8 @@ func (sn * SymNode) NodeTyp() NodeType {
 func (sn * SymNode) String() string {
     return color.Teal(sn.Name)
 }
+
+var NIL_NODE = NewSymNode("nil")
 
 type CallNode struct {      // Function and macro calls
     Fun     Node       // Function head
@@ -180,22 +182,14 @@ func Parse(tokens []*Token) Node {
     return node
 }
 
-var LEVEL = 0
-
 func parse(tokens []*Token, until TokenType) (Node, int) {
     root := NewListNode()
     // Return the next item & tokens read
     for i := 0; i < len(tokens); i ++ {
         token := tokens[i]
-        //fmt.Printf("%sparse.for.token: %v\n", strings.Repeat("  ", LEVEL), token)
         switch t := token.Typ(); t {
         case FUNC_BEGIN, LIST_BEGIN, DICT_BEGIN:
-            LEVEL ++
-            //fmt.Println("recur!")
             next, advance := parse(tokens[i + 1:], t + 1)  // Skip the left brac in the recur
-            //fmt.Println("unrecur!")
-            LEVEL --
-            //fmt.Println("recur parse.next:", next)
             root.Add(next)
             i += advance + 1
         case FUNC_END, LIST_END, DICT_END:
@@ -210,16 +204,13 @@ func parse(tokens []*Token, until TokenType) (Node, int) {
                 }
                 panic("???")
             }
-            //fmt.Println("until =", until)
-            //fmt.Println("token.Typ() =", t)
             panic("Unexpected bracket end!")
         case TOKEN:
             next := NewSymNode(token.Cont())
-            if until == TOKEN_NONE {
-                return next, 1
-            }
+            //if until == TOKEN_NONE {
+            //    return next, 1
+            //}
             root.Add(next)
-            //fmt.Println("parse.for.next:", next)
         case STRING:
             root.Add(NewLiteralNode(token.Cont()))
         case INTEGER:
@@ -245,7 +236,6 @@ func parse(tokens []*Token, until TokenType) (Node, int) {
             case UNQUOTESP:
                 symbol = "unquote-splice"
             }
-            //fmt.Println(symbol)
             cn := NewCallNode(NewSymNode(symbol))
             next := tokens[i + 1]
             var (
@@ -259,7 +249,6 @@ func parse(tokens []*Token, until TokenType) (Node, int) {
             default:
                 sub, advance = NewSymNode(tokens[i + 1].Cont()), 1
             }
-            //fmt.Println("sub, advance:", sub, advance)
             if next == nil {
                 panic("Expected item after " + symbol)
             }
@@ -273,5 +262,5 @@ func parse(tokens []*Token, until TokenType) (Node, int) {
     if until == TOKEN_NONE {
         return root, len(tokens)
     }
-    panic("parse.Error!")
+    panic("Premature end of input: Expect closed parenthese!")
 }
